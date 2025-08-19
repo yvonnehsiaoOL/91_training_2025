@@ -5,13 +5,15 @@ export default class BudgetManager {
 
     private budgetService: BudgetService;
 
-    constructor() {
-        this.budgetService = new BudgetService();
+    constructor(service: BudgetService) {
+        this.budgetService = service;
     }
 
     queryTotalAmount(start: Date, end: Date): number {
-        const budgets = this.budgetService.getAll();
         const period = new Period(start, end);
-        return Math.round(budgets.reduce((total, budget) => total + budget.getOverlappingAmount(period), 0));
+        return Math.round(
+            (this.budgetService.getAll())
+            .reduce((total, budget) => total + budget.getOverlappingAmount(period), 0)
+        );
     }
 };

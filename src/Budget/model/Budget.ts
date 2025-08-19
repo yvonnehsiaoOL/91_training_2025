@@ -32,7 +32,6 @@ export default class Budget {
     }
 
     private getDailyAmount(): number {
-        const days = this.getDays()
         return this.amount / this.getDays()
     }
 
@@ -42,7 +41,7 @@ export default class Budget {
         return new Period(firstDay, lastDay);
     }
 
-    getOverlappingAmount(period: Period): number {
-        return this.getDailyAmount() * period.getOverlappingDays(this.createPeriod())
+    getOverlappingAmount(anotherPeriod: Period): number {
+        return this.getDailyAmount() * anotherPeriod.getOverlappingDays(this.createPeriod())
     }
 };
