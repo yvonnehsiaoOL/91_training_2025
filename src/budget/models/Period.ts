@@ -1,45 +1,34 @@
-import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 import { TIME_UNIT } from "./Constants";
 
 export class Period {
     
-    private startDate: dayjs.Dayjs;
-    private endDate: dayjs.Dayjs;
+    private readonly start: Dayjs;
+    private readonly end: Dayjs;
 
-    constructor(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) {
-        this.startDate = startDate;
-        this.endDate = endDate;
+    constructor(start: Dayjs, end: Dayjs) {
+        this.start = start;
+        this.end = end;
     }
 
-    private hasOverlapping(other: Period): boolean {
-        return !this.startDate.isAfter(other.getEndDate()) && !this.endDate.isBefore(other.getStartDate());
+    private hasNoOverlapping(other: Period): boolean {
+        return this.start.isAfter(other.end) || this.end.isBefore(other.start);
     }
 
-    private getStartDate(): dayjs.Dayjs {
-        return this.startDate;
+    private isInvalid(): boolean {
+        return this.end.isBefore(this.start);
     }
 
-    private getEndDate(): dayjs.Dayjs {
-        return this.endDate;
+    private getDays(): number {
+        return this.end.diff(this.start, TIME_UNIT.DAY) + 1;
     }
 
-    getDays(): number {
-        return this.endDate.diff(this.startDate, TIME_UNIT.DAY) + 1;
-    }
-
-    getOverlappingPeriod(other: Period): Period | null {
-        const hasOverlapping = this.hasOverlapping(other);
-        if (!hasOverlapping) {
-            return null;
+    getOverlappingDays(other: Period): number {
+        if (this.isInvalid() || this.hasNoOverlapping(other) ) {
+            return 0
         }
-        const effectiveStartDate = this.startDate.isAfter(other.getStartDate()) 
-            ? this.startDate 
-            : other.getStartDate();
-            
-        const effectiveEndDate = this.endDate.isBefore(other.getEndDate()) 
-            ? this.endDate 
-            : other.getEndDate();
-
-        return new Period(effectiveStartDate, effectiveEndDate);
+        const effectiveStartDate = this.start.isAfter(other.start) ? this.start : other.start
+        const effectiveEndDate = this.end.isBefore(other.end) ? this.end : other.end
+        return new Period(effectiveStartDate, effectiveEndDate).getDays();
     }
 }
