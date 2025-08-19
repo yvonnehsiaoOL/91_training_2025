@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
-import { BudgetService, Budget } from "./BudgetService";
+import { BudgetService } from "./BudgetService";
+import { Period } from "./models/Period";
 
 export class BudgetManager {
 
     private service: BudgetService;
-    
+
     constructor(service: BudgetService) {
         this.service = service;
     }
@@ -15,13 +16,11 @@ export class BudgetManager {
             return 0;
         }
         return budgets.reduce((total, budget) => {
-            if (startDate.isAfter(budget.getLastDate()) || endDate.isBefore(budget.getFirstDate())) {
+            const overlappingPeriod = new Period(startDate, endDate).getOverlappingPeriod(budget.createPeriod());
+            if (overlappingPeriod === null) {
                 return total;
             }
-            const effectiveStartDate = startDate.isAfter(budget.getFirstDate()) ? startDate : budget.getFirstDate();
-            const effectiveEndDate = endDate.isBefore(budget.getLastDate()) ? endDate : budget.getLastDate();
-            const overlapDays = effectiveEndDate.diff(effectiveStartDate, 'day') + 1;
-            return total + budget.getDailyAmount() * overlapDays;
+            return total + (budget.getDailyAmount() * overlappingPeriod.getDays());
         }, 0);
     }
 }
