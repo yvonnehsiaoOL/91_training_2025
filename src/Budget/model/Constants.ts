@@ -1,1 +1,8 @@
-export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+export const DATE_FORMAT = {
+    YEAR_MONTH: 'YYYY-MM'
+} as const;
+
+export const TIME_UNIT = {
+    MONTH: 'month',
+    DAY: 'day'
+} as const;

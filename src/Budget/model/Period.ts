@@ -1,6 +1,8 @@
-import { MILLISECONDS_PER_DAY } from "./Constants";
+import dayjs from "dayjs";
+import { TIME_UNIT } from "./Constants";
 
 export class Period {
+    
     private startDate: Date;
     private endDate: Date;
 
@@ -10,16 +12,21 @@ export class Period {
     }
 
     private hasNoOverlapping(anotherPeriod: Period): boolean {
-        return anotherPeriod.endDate < this.startDate || anotherPeriod.startDate > this.endDate;
+        return dayjs(anotherPeriod.endDate).isBefore(dayjs(this.startDate)) || 
+               dayjs(anotherPeriod.startDate).isAfter(dayjs(this.endDate));
     }
 
     private isInvalid(): boolean {
-        return this.endDate < this.startDate;
+        return dayjs(this.endDate).isBefore(dayjs(this.startDate));
     }
 
     private getOverlappingPeriod(anotherPeriod: Period): Period {
-        const effectiveStart = this.startDate.getTime() > anotherPeriod.startDate.getTime() ? this.startDate : anotherPeriod.startDate;
-        const effectiveEnd = this.endDate.getTime() < anotherPeriod.endDate.getTime() ? this.endDate : anotherPeriod.endDate;
+        const effectiveStart = dayjs(this.startDate).isAfter(dayjs(anotherPeriod.startDate)) 
+            ? this.startDate 
+            : anotherPeriod.startDate;
+        const effectiveEnd = dayjs(this.endDate).isBefore(dayjs(anotherPeriod.endDate)) 
+            ? this.endDate
+            : anotherPeriod.endDate;
         return new Period(effectiveStart, effectiveEnd);
     }
 
@@ -28,6 +35,6 @@ export class Period {
             return 0;
         }
         const overlappingPeriod = this.getOverlappingPeriod(anotherPeriod);
-        return Math.floor((overlappingPeriod.endDate.getTime() - overlappingPeriod.startDate.getTime()) / MILLISECONDS_PER_DAY) + 1;
+        return dayjs(overlappingPeriod.endDate).diff(dayjs(overlappingPeriod.startDate), TIME_UNIT.DAY) + 1;
     }
 }

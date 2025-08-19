@@ -3,14 +3,10 @@ import Budget from "../model/Budget";
 import BudgetService from "../service/BudgetService";
 
 describe('BudgetManager', () => {
-    let budgetManager: BudgetManager;
-    let budgetService: BudgetService;
 
-    beforeEach(() => {
-        budgetService = new BudgetService();
-        budgetManager = new BudgetManager(budgetService);
-    });
-    
+    const budgetService = new BudgetService();
+    const budgetManager = new BudgetManager(budgetService);
+
     const givenBudget = (budgets: Budget[]) => {
         jest.spyOn(budgetService, 'getAll').mockReturnValue(budgets);
     };

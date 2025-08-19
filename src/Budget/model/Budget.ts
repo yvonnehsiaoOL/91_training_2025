@@ -1,5 +1,6 @@
 import { Period } from "./Period";
-import { DateComponent } from "./DateComponent";
+import dayjs, { Dayjs } from "dayjs";
+import { DATE_FORMAT, TIME_UNIT } from "./Constants";
 
 export default class Budget {
 
@@ -11,24 +12,16 @@ export default class Budget {
         this.yearMonth = yearMonth;
     }
 
-    private getDateComponent(): DateComponent {
-        const [year, month] = this.yearMonth.split("-").map(Number)
-        return { year, month }
+    private getFirstDay(): Dayjs {
+        return dayjs(this.yearMonth, DATE_FORMAT.YEAR_MONTH).startOf(TIME_UNIT.MONTH)
     }
 
-    private getFirstDay(): Date {
-        const { year, month } = this.getDateComponent()
-        return new Date(year, month - 1, 1, 0, 0, 0, 0)
-    }
-
-    private getLastDay(): Date {
-        const { year, month } = this.getDateComponent()
-        return new Date(year, month, 0, 23, 59, 59, 999)
+    private getLastDay(): Dayjs {
+        return dayjs(this.yearMonth, DATE_FORMAT.YEAR_MONTH).endOf(TIME_UNIT.MONTH)
     }
 
     private getDays(): number {
-        const diffTime = this.getLastDay().getTime() - this.getFirstDay().getTime()
-        return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
+        return this.getLastDay().diff(this.getFirstDay(), TIME_UNIT.DAY) + 1
     }
 
     private getDailyAmount(): number {
@@ -36,9 +29,10 @@ export default class Budget {
     }
 
     private createPeriod(): Period {
-        const firstDay = this.getFirstDay()
-        const lastDay = this.getLastDay()
-        return new Period(firstDay, lastDay);
+        return new Period(
+            (this.getFirstDay().toDate()), 
+            (this.getLastDay().toDate())
+        );
     }
 
     getOverlappingAmount(anotherPeriod: Period): number {
